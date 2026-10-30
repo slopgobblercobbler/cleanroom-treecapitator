@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "cleanroom_treecapitator",
+  "version": "${version}",
+  "name": "Treecapitator CleanRoom",
+  "description": "Instantaneous recursive tree felling with anti-cabin heuristic detection.",
+  "authors": [
+    "CleanRoom Team"
+  ],
+  "contact": {
+    "homepage": "https://github.com/cleanroom/minecraft_mod_ports"
+  },
+  "license": "MIT",
+  "icon": "assets/cleanroom_treecapitator/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.cleanroom.treecapitator.fabric.TreecapitatorFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": ">=1.20 <=1.21.3",
+    "java": ">=17"
+  }
+}

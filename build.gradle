@@ -1,0 +1,89 @@
+allprojects {
+    group = property('maven_group')
+    version = property('mod_version')
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases'
+        }
+        maven {
+            name = 'Sponge Snapshots'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    def isCommon = project.name == 'common-core' || project.name == 'common'
+    def is120 = project.name.contains('1.20.1')
+    def targetJava = (isCommon || is120) ? 17 : 21
+
+    java {
+        if (targetJava == 17) {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        } else {
+            sourceCompatibility = JavaVersion.VERSION_21
+            targetCompatibility = JavaVersion.VERSION_21
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = targetJava
+    }
+
+    dependencies {
+        implementation 'com.google.code.gson:gson:2.10.1'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    if (project.name != 'common-core') {
+        dependencies {
+            implementation rootProject.project(':common-core')
+        }
+
+        if (project.name != 'common') {
+            dependencies {
+                implementation rootProject.project(':common')
+            }
+
+            sourceSets.main.java.srcDirs += rootProject.project(':common-core').sourceSets.main.java.srcDirs
+            sourceSets.main.java.srcDirs += rootProject.project(':common').sourceSets.main.java.srcDirs
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    processResources {
+        inputs.property 'version', project.version
+        inputs.property 'mod_version', project.version
+
+        filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml', 'META-INF/mods.toml']) {
+            expand([
+                'version': project.version,
+                'mod_version': project.version
+            ])
+        }
+    }
+
+    if (project.name != 'common-core' && project.name != 'common') {
+        tasks.named('jar', Jar) {
+            archiveBaseName.set('cleanroom_treecapitator')
+            archiveVersion.set("${project.version}-${project.name}")
+            archiveClassifier.set('')
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
